@@ -46,7 +46,7 @@ const Home = () => {
     <section className={styles.page} data-testid="product-listing">
       <header className={styles.header}>
         <p className={styles.eyebrow}>Mini commerce</p>
-        <h1>Everyday picks from Fake Store</h1>
+        <h1>Everyday picks from Easy Store</h1>
         <p>
           Browse the catalogue, choose a variant, and keep your cart through a
           refresh.

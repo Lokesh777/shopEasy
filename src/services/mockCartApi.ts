@@ -1,11 +1,14 @@
 import { CartItem } from "../types/product";
 
 export const addCartItemRequest = async (item: CartItem) => {
-  await new Promise((resolve) => window.setTimeout(resolve, 450));
-
-  if (Math.random() < 0.15) {
-    throw new Error("Cart service is temporarily unavailable.");
-  }
-
-  return item;
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      try {
+        // simulate success
+        resolve(item);
+      } catch (e) {
+        reject(new Error("Cart API failed"));
+      }
+    }, 200);
+  });
 };

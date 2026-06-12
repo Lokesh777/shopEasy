@@ -49,10 +49,13 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     variant: ProductVariant,
     quantity = 1,
   ) => {
-    if (variant.stockState === "sold-out") return;
+    if (variant.stockState === "sold-out") {
+      throw new Error("Sold out");
+    }
 
     const { salePrice, originalPrice } = getPricing(product);
     const cartKey = getCartKey(product.id, variant);
+
     const nextItem: CartItem = {
       cartKey,
       productId: product.id,
@@ -68,7 +71,11 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       maxQuantity: variant.stock,
     };
 
-    await addCartItemRequest(nextItem);
+    try {
+      await addCartItemRequest(nextItem);
+    } catch (err) {
+      throw err; // 🔥 THIS IS IMPORTANT
+    }
 
     setCart((currentCart) => {
       const existingItem = currentCart.find((item) => item.cartKey === cartKey);
