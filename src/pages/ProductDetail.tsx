@@ -1,184 +1,220 @@
-import React, { CSSProperties, useEffect, useState } from "react";
-import { ProductDetailsProps } from "../components/Card";
+import { useEffect, useState,  lazy, Suspense } from "react";
+import { Link, useParams, useSearchParams } from "react-router-dom";
+const QuantityPicker = lazy(() => import("../components/QuantityPicker"));
+const VariantSelector = lazy(() => import("../components/VariantSelector"));
+import {
+  findVariant,
+  getBrandName,
+  getPricing,
+  getProductImages,
+  getProductVariants,
+} from "../data/variants";
 import { getProductById } from "../services/api";
-import { useNavigate, useParams } from "react-router-dom";
-import StarRating from "../components/StarRating";
-import { useCart } from "../context/CartContext";
-
-const MemoStarRating = React.memo(StarRating);
+import { getCartKey, useCart } from "../stores/CartContext";
+import { Product } from "../types/product";
+import styles from "./ProductDetail.module.scss";
 
 const ProductDetail = () => {
-  const [product, setProduct] = useState<ProductDetailsProps>();
   const { id } = useParams<{ id: string }>();
-  const { addToCart, cart } = useCart();
-  const [showToast, setShowToast] = useState(false);
-  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { addToCart, cart, updateQuantity, removeFromCart } = useCart();
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [cartError, setCartError] = useState("");
+  const [addingToCart, setAddingToCart] = useState(false);
+  const [activeImage, setActiveImage] = useState(0);
+  const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
-    if (!id) return;
-    let isMounted = true;
+    let ignore = false;
 
-    const fetchProduct = async () => {
+    const loadProduct = async () => {
+      if (!id) return;
+      setLoading(true);
+      setError("");
+
       try {
-        const res = await getProductById(id);
-
-        if (isMounted) {
-          setProduct(res);
-        }
-      } catch (error) {
-        console.error("Failed to fetch product", error);
+        const productData = await getProductById(id);
+        if (!ignore) setProduct(productData);
+      } catch {
+        if (!ignore) setError("This product could not be loaded.");
+      } finally {
+        if (!ignore) setLoading(false);
       }
     };
 
-    fetchProduct();
+    loadProduct();
     return () => {
-      isMounted = false; // ✅ cleanup
+      ignore = true;
     };
   }, [id]);
 
-  if (!product) {
-    return (
-      <div style={style.loaderContainer}>
-        <div style={style.loader}></div>
-      </div>
+  useEffect(() => {
+    if (!product) return;
+
+    const variants = getProductVariants(product);
+    const selectedVariant = findVariant(
+      variants,
+      searchParams.get("color"),
+      searchParams.get("size"),
     );
+
+    if (
+      searchParams.get("color") !== selectedVariant.colorName ||
+      searchParams.get("size") !== selectedVariant.size
+    ) {
+      setSearchParams(
+        { color: selectedVariant.colorName, size: selectedVariant.size },
+        { replace: true },
+      );
+    }
+  }, [product, searchParams, setSearchParams]);
+
+  if (loading) {
+    return <div className="pageStatus">Loading product...</div>;
   }
-  //container
-  const { title, description, image, price, rating } = product;
-  const isInCart = cart.some((item) => item.id === product.id);
 
-  const reviewText =
-    rating.count < 2 ? `${rating.count} Review` : `${rating.count} Reviews`;
+  if (error || !product) {
+    return <div className="pageStatus pageStatusError">{error}</div>;
+  }
 
-  const buttonStyle = isInCart
-    ? { ...style.button, ...style.buttonDisabled }
-    : style.button;
+  const variants = getProductVariants(product);
+  const selectedVariant = findVariant(
+    variants,
+    searchParams.get("color"),
+    searchParams.get("size"),
+  );
+  const images = getProductImages(product);
+  const pricing = getPricing(product);
+  const isSoldOut = selectedVariant.stockState === "sold-out";
+  const cartItem = cart.find(
+    (item) => item.cartKey === getCartKey(product.id, selectedVariant),
+  );
 
+  const handleVariantSelect = (variant: typeof selectedVariant) => {
+    setSearchParams({ color: variant.colorName, size: variant.size });
+    setQuantity(1);
+    setCartError("");
+  };
+
+  const handleAddToCart = async () => {
+    setAddingToCart(true);
+    setCartError("");
+
+    try {
+      await addToCart(product, selectedVariant, quantity);
+    } catch {
+      setCartError("Could not add this item. Please try again.");
+    } finally {
+      setAddingToCart(false);
+    }
+  };
   return (
-    <div style={style.container}>
-      <button
-        style={style.backButton}
-        onClick={() => navigate(-1) || navigate("/")}
-      >
-        ← Back
-      </button>
-      <h3 style={style.title}>{title}</h3>
-      <img style={style.img} src={image} alt={title} loading="lazy" decoding="async" />
-      <h3> ₹{price}</h3>
-      <div style={style.rating}>
-        <MemoStarRating rating={rating.rate} />
-        <p style={style.review}>{reviewText}</p>
-      </div>
-      <p style={style.description}>{description}</p>
-      <button
-        style={{
-          ...buttonStyle,
-          transition: "transform 0.2s ease",
-        }}
-        disabled={isInCart}
-        onClick={() => {
-          addToCart(product);
-          setShowToast(true);
+    <section className={styles.page}>
+      <Link className={styles.backLink} to="/">
+        Back to products
+      </Link>
 
-          setTimeout(() => {
-            setShowToast(false);
-          }, 2000);
-        }}
-      >
-        {isInCart ? "✓ Added" : "Add to Cart"}
-      </button>
-      {showToast && <div style={style.toast}>✅ Added to cart</div>}
-    </div>
+      <div className={styles.layout}>
+        <section className={styles.gallery} aria-label="Product images">
+          <div className={styles.primaryImage}>
+           <img
+            src={images[activeImage]}
+            alt={product.title}
+            width={400}
+            height={550}
+             loading={activeImage === 0 ? "eager" : "lazy"}
+            decoding="async"
+            fetchpriority="high"
+          />
+          </div>
+          <div className={styles.thumbnails}>
+            {images.map((image, index) => (
+              <button
+                key={`${image}-${index}`}
+                className={activeImage === index ? styles.activeThumb : ""}
+                type="button"
+                onClick={() => setActiveImage(index)}
+              >
+                <img src={image} alt={`${product.title} view ${index + 1}`}  loading="eager"  decoding="async" fetchpriority="low" />
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <section className={styles.info}>
+          <p className={styles.brand}>{getBrandName(product)}</p>
+          <h1>{product.title}</h1>
+
+          <div className={styles.price}>
+            <span>${pricing.salePrice.toFixed(2)}</span>
+            {pricing.originalPrice && (
+              <del>${pricing.originalPrice.toFixed(2)}</del>
+            )}
+          </div>
+
+          <p className={styles.description}>{product.description}</p>
+
+         <Suspense fallback={<div>Loading...</div>}>
+            <VariantSelector
+              variants={variants}
+              selectedVariant={selectedVariant}
+              onSelect={handleVariantSelect}
+            />
+          </Suspense>
+
+          {cartItem ? (
+            <div className={styles.cartControls}>
+              <div>
+                <strong>In cart</strong>
+                <span>Update quantity for this colour and size.</span>
+              </div>
+             <Suspense fallback={<div>Loading...</div>}>
+                <QuantityPicker
+                  value={quantity}
+                  max={Math.max(selectedVariant.stock, 1)}
+                  onChange={setQuantity}
+                  disabled={isSoldOut}
+                />
+              </Suspense>
+              <button
+                className={styles.removeButton}
+                type="button"
+                onClick={() => removeFromCart(cartItem.cartKey)}
+              >
+                Remove
+              </button>
+            </div>
+          ) : (
+            <div className={styles.purchase}>
+             <Suspense fallback={<div>Loading...</div>}>
+                <QuantityPicker
+                  value={quantity}
+                  max={Math.max(selectedVariant.stock, 1)}
+                  onChange={setQuantity}
+                  disabled={isSoldOut}
+                />
+              </Suspense>
+              <button
+                className={styles.addButton}
+                type="button"
+                onClick={handleAddToCart}
+                disabled={isSoldOut || addingToCart}
+              >
+                {isSoldOut
+                  ? "Sold out"
+                  : addingToCart
+                    ? "Adding..."
+                    : "Add to Cart"}
+              </button>
+            </div>
+          )}
+          {cartError && <p className={styles.cartError}>{cartError}</p>}
+        </section>
+      </div>
+    </section>
   );
 };
 
 export default ProductDetail;
-
-const style: { [key: string]: CSSProperties } = {
-  container: {
-    padding: "10px 20px 40px 20px",
-  },
-  card: {
-    padding: "10px",
-    borderRadius: "8px",
-    boxShadow: "0px 4px 12px rgba(0,0,0,0.2)",
-    boxSizing: "border-box",
-  },
-  img: {
-    width: "100%",
-    height: "350px",
-    objectFit: "contain",
-    display: "block", //avoid the gaps
-  },
-  rating: {
-    display: "flex",
-    gap: "20px",
-    alignItems: "center",
-  },
-  review: {
-    fontSize: "12px",
-    color: "#c7c7c7",
-  },
-  link: {
-    textDecoration: "none",
-    color: "inherit",
-  },
-  title: {
-    fontSize: "20px",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    display: "-webkit-box",
-    WebkitLineClamp: 2,
-    WebkitBoxOrient: "vertical",
-  },
-  description: {},
-  button: {
-    padding: "10px 40px",
-    cursor: "pointer",
-    background: "black",
-    color: "white",
-    border: "none",
-    borderRadius: "8px",
-  },
-  buttonDisabled: {
-    background: "#ccc", // grey
-    color: "#666",
-    cursor: "not-allowed", // 🚫 cursor
-    opacity: 0.7,
-  },
-  backButton: {
-    marginBottom: "10px",
-    padding: "6px 12px",
-    cursor: "pointer",
-    background: "transparent",
-    border: "1px solid #ccc",
-    borderRadius: "6px",
-  },
-  toast: {
-    position: "fixed",
-    bottom: "20px",
-    left: "50%",
-    transform: "translateX(-50%)",
-    background: "black",
-    color: "white",
-    padding: "10px 20px",
-    borderRadius: "8px",
-    fontSize: "14px",
-    zIndex: 1000,
-  },
-  loaderContainer: {
-    height: "80vh",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  loader: {
-    width: "40px",
-    height: "40px",
-    border: "4px solid #ccc",
-    borderTop: "4px solid black",
-    borderRadius: "50%",
-    animation: "spin 1s linear infinite",
-  },
-};

@@ -1,103 +1,49 @@
-const BASE_URL = "https://api.escuelajs.co/api/v1";
+import { Product } from "../types/product";
 
-type EscuelaCategory = {
-  id: number;
-  name: string;
-  slug: string;
-  image: string;
-  creationAt?: string;
-  updatedAt?: string;
-};
+const BASE_URL = "https://fakestoreapi.com";
 
-type EscuelaProduct = {
+type FakeStoreProduct = {
   id: number;
   title: string;
   price: number;
   description: string;
-  category: EscuelaCategory;
-  images: string[];
-};
-
-type AppProduct = {
-  id: number;
-  title: string;
   category: string;
-  description: string;
   image: string;
-  price: number;
-  rating: { count: number; rate: number };
+  rating?: {
+    rate: number;
+    count: number;
+  };
 };
 
-const toProductsQuery = (params: Record<string, string | number>) => {
-  const usp = new URLSearchParams();
-  Object.entries(params).forEach(([k, v]) => {
-    usp.set(k, String(v));
-  });
-  return usp.toString();
-};
-
-const toAppProduct = (p: EscuelaProduct): AppProduct => ({
-  id: p.id,
-  title: p.title,
-  category: p.category?.name ?? p.category?.slug ?? "",
-  description: p.description,
-  image: p.images?.[0] ?? "",
-  price: p.price,
-  rating: { count: 0, rate: 0 },
+const toAppProduct = (product: FakeStoreProduct): Product => ({
+  id: product.id,
+  title: product.title,
+  category: product.category,
+  description: product.description,
+  image: product.image,
+  price: product.price,
+  rating: {
+    rate: product.rating?.rate ?? 0,
+    count: product.rating?.count ?? 0,
+  },
 });
 
-export const getProducts = async () => {
-  const res = await fetch(`${BASE_URL}/products`);
-  const data: EscuelaProduct[] = await res.json();
-  return data.map(toAppProduct);
+const request = async <T>(path: string): Promise<T> => {
+  const response = await fetch(`${BASE_URL}${path}`);
+
+  if (!response.ok) {
+    throw new Error(`Fake Store API request failed: ${response.status}`);
+  }
+
+  return response.json();
 };
 
-export const getProductsPaginated = async (offset: number, limit: number) => {
-  const qs = toProductsQuery({ offset, limit });
-  const res = await fetch(`${BASE_URL}/products/?${qs}`);
-  const data: EscuelaProduct[] = await res.json();
+export const getProducts = async () => {
+  const data = await request<FakeStoreProduct[]>("/products");
   return data.map(toAppProduct);
 };
 
 export const getProductById = async (id: string) => {
-  const res = await fetch(`${BASE_URL}/products/${id}`);
-  const data: EscuelaProduct = await res.json();
+  const data = await request<FakeStoreProduct>(`/products/${id}`);
   return toAppProduct(data);
-};
-
-export const getCategories = async () => {
-  const res = await fetch(`${BASE_URL}/categories`);
-  const data: EscuelaCategory[] = await res.json();
-  return data.map((c) => c.slug);
-};
-
-export const getProductsByCategory = async (category: string) => {
-
-  const isNumeric = /^\d+$/.test(category);
-  const query = isNumeric
-    ? `categoryId=${encodeURIComponent(category)}`
-    : `categorySlug=${encodeURIComponent(category)}`;
-
-  const res = await fetch(`${BASE_URL}/products/?${query}`);
-  const data: EscuelaProduct[] = await res.json();
-  return data.map(toAppProduct);
-};
-
-export const getProductsByCategoryPaginated = async (
-  category: string,
-  offset: number,
-  limit: number,
-) => {
-  const isNumeric = /^\d+$/.test(category);
-  const params: Record<string, string | number> = { offset, limit };
-  if (isNumeric) {
-    params.categoryId = category;
-  } else {
-    params.categorySlug = category;
-  }
-  const qs = toProductsQuery(params);
-
-  const res = await fetch(`${BASE_URL}/products/?${qs}`);
-  const data: EscuelaProduct[] = await res.json();
-  return data.map(toAppProduct);
 };

@@ -1,196 +1,89 @@
-# 🛍️ ShopEasy – Scalable E-commerce Web Application
+# ShopEasy
 
-A production-ready, responsive e-commerce application built using **React + TypeScript**, designed with a focus on **performance, scalability, accessibility, and clean architecture**.
+A mini e-commerce app built for the frontend assignment using React 18, Vite,
+TypeScript, React Router, Context API, localStorage, and SCSS modules.
 
----
+Live URL: add the deployed Vercel or Netlify URL here before submission.
 
-## 🚀 Live Overview
+## Features
 
-ShopEasy simulates a real-world e-commerce experience with product discovery, filtering, sorting, detailed views, and cart management — all optimized for performance and usability.
+- Product listing page using the Fake Store API
+- Responsive product grid with quick add to cart
+- Product detail page with image thumbnails, colour and size variants, stock
+  states, quantity selection, and URL-driven selected variant state
+- Right-side cart drawer with item quantity controls, remove action, subtotal,
+  and grand total
+- Cart persistence with localStorage
+- Desktop two-column product detail layout and mobile single-column layout
+- Bonus coverage: variant selector tests for sold-out state, low stock display,
+  disabled CTA, and quantity cap
+- Bonus mock cart API with add-to-cart loading state and simulated random
+  failure
 
----
+## Tech Stack
 
-## ✨ Key Features
+- React 18 with hooks
+- TypeScript
+- Vite
+- React Router
+- SCSS modules and shared global SCSS
+- Context API for cart state
+- Fake Store API: https://fakestoreapi.com
 
-* 🏠 **Product Listing** with dynamic data fetching
-* 🔍 **Multi-select Category Filtering** (URL-driven state)
-* 📊 **Sorting** (Price & Rating)
-* 📄 **Product Detail View**
-* 🛒 **Cart Management** (Add, Remove, Quantity Control)
-* 🔗 **URL State Sync** using query params
-* ⚡ **Code Splitting & Lazy Loading** (React Suspense)
-* 🧠 **Global State Management** via Context API
-* 📱 **Responsive Design** (Mobile-first approach)
-* 🧪 **End-to-End Testing** with Cypress
-* 🚀 **Performance Optimized** (Lighthouse-driven improvements)
-
----
-
-## 🛠️ Tech Stack
-
-* **Frontend:** React (CRA) + TypeScript
-* **Routing:** React Router
-* **State Management:** Context API
-* **Styling:** CSS (Responsive + Flex/Grid)
-* **Testing:** Cypress (E2E)
-* **Performance Tools:** Lighthouse, Chrome DevTools
-
----
-
-## 📦 Getting Started
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/Lokesh777/ecommerce-app.git
-cd ecommerce-app
-```
-
----
-
-### 2. Install Dependencies
+## Setup
 
 ```bash
 npm install
+npm run dev
 ```
 
----
-
-### 3. Run in Development
+The development server will print the local URL, usually:
 
 ```bash
-npm start
+http://localhost:5173
 ```
 
-App will be available at:
-👉 http://localhost:3000
-
----
-
-### 4. Run Production Build (Recommended for Evaluation)
+## Build
 
 ```bash
 npm run build
-npx serve -s build
 ```
 
----
+## Project Structure
 
-## 🧪 Running Tests (Cypress)
-
-### Open Cypress UI
-
-```bash
-npx cypress open
-```
-
-### Run in Headless Mode
-
-```bash
-npx cypress run
-```
-
----
-
-## ✅ Test Coverage
-
-* Page navigation flows
-* Product listing visibility
-* Product detail rendering
-* Cart operations (add/remove/update)
-* UI interaction validation
-
----
-
-## 🚀 Performance & Optimization
-
-This project was iteratively optimized using **Lighthouse audits** and performance profiling.
-
-### 📊 Achieved Scores (Production Build)
-
-* ⚡ Performance: **90+**
-* ♿ Accessibility: **95+**
-* ✅ Best Practices: **95+**
-* 🔍 SEO: **100**
-
----
-
-### 🔧 Key Optimizations
-
-* **Code Splitting:** `React.lazy` + `Suspense`
-* **Image Optimization:** CDN-based transformation (Cloudinary fetch → WebP, compressed, resized)
-* **Memoization:** Reduced unnecessary re-renders
-* **Efficient Data Fetching:** Caching & conditional API calls
-* **Lazy Loading:** Images & routes
-* **Accessibility Fixes:** Proper labels, semantic structure, contrast improvements
-![alt text](image-1.png)
-
----
-
-## 🧠 Architecture Highlights
-
-* Separation of concerns (`components`, `pages`, `services`, `context`)
-* URL-driven state (filters & sorting persisted in query params)
-* Reusable and composable components
-* Clean TypeScript typing for scalability
-
----
-
-## 📁 Project Structure
-
-```
+```text
 src/
- ├── components/     # Reusable UI components
- ├── pages/          # Route-level pages
- ├── context/        # Global state management
- ├── services/       # API abstraction layer
- ├── types/          # TypeScript interfaces
- ├── App.tsx
+  components/  Reusable UI pieces such as product cards, cart drawer, variants
+  data/        Local variant and pricing helpers used to fill Fake Store gaps
+  pages/       Route-level product listing and product detail pages
+  services/    Fake Store API access
+  stores/      Cart Context API provider and hook
+  styles/      Global SCSS
+  types/       Shared TypeScript types
 ```
 
----
+## Design Decisions
 
-## 🧠 Assumptions
+Fake Store API does not provide product variants, brands, sale prices, or
+multiple images. I kept the API as the source of truth for product identity,
+image, title, price, category, and description, then added deterministic local
+helpers for assignment-only commerce details. This keeps the app stable across
+refreshes and makes deep links predictable.
 
-* API responses are consistent and reliable
-* Product IDs are unique
-* No authentication required for this scope
-* Cart state is client-side only
+Cart state uses Context API because the global state surface is small: add,
+remove, update quantity, and persist cart items. A larger store would add
+unnecessary setup for this scope.
 
----
+SCSS modules are used for components and pages so styles remain close to the UI
+they belong to, while `src/styles/global.scss` holds resets and shared page
+status styles.
 
-## ⚠️ Limitations
+## Known Trade-offs
 
-* No backend (uses public API)
-* No persistent storage (cart resets on refresh)
-* No authentication/authorization
-* No pagination or infinite scrolling
-
----
-
-## ✨ Additional Enhancements
-
-* 🔄 API response caching to reduce redundant calls
-* 📌 Sticky filter bar for improved UX
-* 📱 Mobile-friendly horizontal filters
-* 🚫 Disabled duplicate cart additions
-* ♿ Improved accessibility (labels, semantic tags)
-* 🎯 Clean and minimal UI for better usability
-
----
-
-## 📌 Accessibility
-
-* Semantic HTML (`section`, `article`, `header`)
-* Proper form labeling (`label + htmlFor`)
-* Keyboard-friendly interactions
-* Improved color contrast for readability
-
-
-## 📬 Contact
-
-**Lokesh Kumar**
-Frontend Developer
-📧 [lokeshdevgan777@gmail.com](mailto:lokeshdevgan777@gmail.com)
-
----
+- Variant stock is generated locally because Fake Store has no inventory API.
+- Product thumbnails reuse the product image because Fake Store exposes one
+  image per product.
+- Checkout is intentionally out of scope.
+- The mock cart API intentionally has a small random failure rate to exercise
+  error UI. Once an item is already in the cart, the UI switches to quantity
+  controls instead of repeating the Add to Cart button.

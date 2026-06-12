@@ -1,0 +1,12 @@
+{
+  "id": 3,
+  "title": "Test Jacket",
+  "price": 120,
+  "description": "A reliable test product.",
+  "category": "clothing",
+  "image": "https://example.com/product.png",
+  "rating": {
+    "rate": 4,
+    "count": 10
+  }
+}

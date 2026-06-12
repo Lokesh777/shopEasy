@@ -1,0 +1,21 @@
+.picker {
+  display: grid;
+  grid-template-columns: 38px 1fr 38px;
+  min-height: 46px;
+  overflow: hidden;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #ffffff;
+
+  button {
+    border: 0;
+    background: #f8fafc;
+    font-weight: 900;
+  }
+
+  span {
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+  }
+}

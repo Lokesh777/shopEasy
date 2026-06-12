@@ -1,0 +1,67 @@
+.selector {
+  display: grid;
+  gap: 18px;
+
+  fieldset {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  legend {
+    margin-bottom: 10px;
+    color: #172033;
+    font-weight: 800;
+  }
+}
+
+.swatches,
+.sizes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.swatch {
+  width: 34px;
+  height: 34px;
+  border: 2px solid #cbd5e1;
+  border-radius: 999px;
+}
+
+.selected {
+  border-color: #0f766e !important;
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.16);
+}
+
+.size {
+  display: grid;
+  min-width: 84px;
+  min-height: 58px;
+  gap: 3px;
+  place-items: center;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #172033;
+
+  span {
+    font-weight: 800;
+  }
+
+  small {
+    color: #64748b;
+    font-size: 11px;
+  }
+}
+
+.lowStock {
+  border-color: #f59e0b;
+}
+
+.soldOut {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+  color: #94a3b8;
+}

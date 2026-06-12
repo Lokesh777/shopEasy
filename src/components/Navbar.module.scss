@@ -1,0 +1,54 @@
+.navbar {
+  position: fixed;
+  z-index: 30;
+  top: 0;
+  right: 0;
+  left: 0;
+  display: flex;
+  height: 72px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  border-bottom: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(12px);
+}
+
+.logo {
+  color: #111827;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.cartButton {
+  position: relative;
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #172033;
+  font-weight: 800;
+
+  strong {
+    position: absolute;
+    top: -8px;
+    right: -6px;
+    display: grid;
+    min-width: 22px;
+    height: 22px;
+    place-items: center;
+    border-radius: 999px;
+    background: #0f766e;
+    color: #ffffff;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 767px) {
+  .navbar {
+    padding: 0 16px;
+  }
+}

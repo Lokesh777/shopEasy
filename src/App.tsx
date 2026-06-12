@@ -1,37 +1,17 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { CSSProperties, lazy, Suspense } from "react";
-import { CartProvider } from "./context/CartContext";
+import { BrowserRouter } from "react-router-dom";
+import { CartProvider } from "./stores/CartContext";
 import Navbar from "./components/Navbar";
-import "./App.css";
-
-const Home = lazy(() => import("./pages/Home"));
-const Cart = lazy(() => import("./pages/Cart"));
-const ProductDetail = lazy(() => import("./pages/ProductDetail"));
+import AppRoutes from "./routes/AppRoutes";
 
 function App() {
   return (
-    <CartProvider>
-      <BrowserRouter>
+    <BrowserRouter>
+      <CartProvider>
         <Navbar />
-
-        <main style={style.main}>
-          <Suspense fallback={<div className="loader"></div>}>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/product/:id" element={<ProductDetail />} />
-              <Route path="/cart" element={<Cart />} />
-            </Routes>
-          </Suspense>
-        </main>
-      </BrowserRouter>
-    </CartProvider>
+        <AppRoutes />
+      </CartProvider>
+    </BrowserRouter>
   );
 }
 
 export default App;
-
-const style: { [key: string]: CSSProperties } = {
-  main: {
-    marginTop: "60px",
-  },
-};

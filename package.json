@@ -8,22 +8,22 @@
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^13.5.0",
     "@types/jest": "^27.5.2",
-    "@types/node": "^16.18.126",
+    "@types/node": "^18.19.130",
     "@types/react": "18.2.55",
     "@types/react-dom": "18.2.19",
     "axios": "^1.13.6",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-router-dom": "^7.13.2",
-    "react-scripts": "5.0.1",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "dev": "vite",
+    "start": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run --no-cache"
   },
   "eslintConfig": {
     "extends": [
@@ -44,7 +44,12 @@
     ]
   },
   "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
     "@types/cypress": "^0.1.6",
-    "cypress": "^15.13.0"
+    "cypress": "^15.13.0",
+    "jsdom": "^25.0.1",
+    "sass": "^1.96.0",
+    "vite": "^5.4.21",
+    "vitest": "^2.1.9"
   }
 }
