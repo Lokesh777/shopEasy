@@ -41,9 +41,9 @@ const Navbar = () => {
         </button>
       </nav>
       {cartOpen && (
-      <Suspense fallback={<div>Loading...</div>}>
-            <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
-      </Suspense>
+        <Suspense fallback={<div>Loading...</div>}>
+          <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
+        </Suspense>
       )}
     </>
   );
