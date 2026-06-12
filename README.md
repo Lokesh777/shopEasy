@@ -3,7 +3,7 @@
 A mini e-commerce app built for the frontend assignment using React 18, Vite,
 TypeScript, React Router, Context API, localStorage, and SCSS modules.
 
-Live URL: add the deployed Vercel or Netlify URL here before submission.
+Live URL: [ShopEasy](https://teal-pixie-fbdf45.netlify.app/)
 
 ## Features
 
