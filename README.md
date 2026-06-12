@@ -87,3 +87,6 @@ status styles.
 - The mock cart API intentionally has a small random failure rate to exercise
   error UI. Once an item is already in the cart, the UI switches to quantity
   controls instead of repeating the Add to Cart button.
+
+  <img width="464" height="103" alt="image" src="https://github.com/user-attachments/assets/f8ea55f9-b71d-4d29-808d-95350a83883a" />
+
