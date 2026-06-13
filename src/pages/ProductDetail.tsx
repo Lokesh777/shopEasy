@@ -1,7 +1,6 @@
-import { useEffect, useState,  lazy, Suspense } from "react";
+import { useEffect, useState } from "react";
+import styles from "./ProductDetail.module.scss";
 import { Link, useParams, useSearchParams } from "react-router-dom";
-const QuantityPicker = lazy(() => import("../components/QuantityPicker"));
-const VariantSelector = lazy(() => import("../components/VariantSelector"));
 import {
   findVariant,
   getBrandName,
@@ -11,44 +10,57 @@ import {
 } from "../data/variants";
 import { getProductById } from "../services/api";
 import { getCartKey, useCart } from "../stores/CartContext";
-import { Product } from "../types/product";
-import styles from "./ProductDetail.module.scss";
+
+import { useQuery } from "@tanstack/react-query";
+import QuantityPicker from "../components/QuantityPicker";
+import VariantSelector from "../components/VariantSelector";
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const { addToCart, cart, updateQuantity, removeFromCart } = useCart();
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  // const [product, setProduct] = useState<Product | null>(null);
+  // const [loading, setLoading] = useState(true);
+  // const [error, setError] = useState("");
   const [cartError, setCartError] = useState("");
   const [addingToCart, setAddingToCart] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
 
-  useEffect(() => {
-    let ignore = false;
+const {
+  data: product,
+  isLoading,
+  isError,
+} = useQuery({
+  queryKey: ["product", id],
+  queryFn: () => getProductById(id!),
+  enabled: !!id,
+  staleTime: 1000 * 60 * 5,
+});
 
-    const loadProduct = async () => {
-      if (!id) return;
-      setLoading(true);
-      setError("");
+  // useEffect(() => {
+  //   let ignore = false;
 
-      try {
-        const productData = await getProductById(id);
-        if (!ignore) setProduct(productData);
-      } catch {
-        if (!ignore) setError("This product could not be loaded.");
-      } finally {
-        if (!ignore) setLoading(false);
-      }
-    };
+  //   const loadProduct = async () => {
+  //     if (!id) return;
+  //     setLoading(true);
+  //     setError("");
 
-    loadProduct();
-    return () => {
-      ignore = true;
-    };
-  }, [id]);
+  //     try {
+  //       const productData = await getProductById(id);
+  //       if (!ignore) setProduct(productData);
+  //     } catch {
+  //       if (!ignore) setError("This product could not be loaded.");
+  //     } finally {
+  //       if (!ignore) setLoading(false);
+  //     }
+  //   };
+
+  //   loadProduct();
+  //   return () => {
+  //     ignore = true;
+  //   };
+  // }, [id]);
 
   useEffect(() => {
     if (!product) return;
@@ -71,12 +83,16 @@ const ProductDetail = () => {
     }
   }, [product, searchParams, setSearchParams]);
 
-  if (loading) {
+  if (isLoading) {
     return <div className="pageStatus">Loading product...</div>;
   }
 
-  if (error || !product) {
-    return <div className="pageStatus pageStatusError">{error}</div>;
+  if (isError || !product) {
+    return (
+      <div className="pageStatus pageStatusError">
+        Product could not be loaded.
+      </div>
+    );
   }
 
   const variants = getProductVariants(product);
@@ -124,9 +140,10 @@ const ProductDetail = () => {
             alt={product.title}
             width={400}
             height={550}
-             loading={activeImage === 0 ? "eager" : "lazy"}
+            loading="eager"
             decoding="async"
             fetchpriority="high"
+            sizes="(max-width: 768px) 100vw, 400px"
           />
           </div>
           <div className={styles.thumbnails}>
@@ -155,14 +172,11 @@ const ProductDetail = () => {
           </div>
 
           <p className={styles.description}>{product.description}</p>
-
-         <Suspense fallback={<div>Loading...</div>}>
             <VariantSelector
               variants={variants}
               selectedVariant={selectedVariant}
               onSelect={handleVariantSelect}
             />
-          </Suspense>
 
           {cartItem ? (
             <div className={styles.cartControls}>
@@ -170,14 +184,12 @@ const ProductDetail = () => {
                 <strong>In cart</strong>
                 <span>Update quantity for this colour and size.</span>
               </div>
-             <Suspense fallback={<div>Loading...</div>}>
-                <QuantityPicker
+             <QuantityPicker
                   value={quantity}
                   max={Math.max(selectedVariant.stock, 1)}
                   onChange={setQuantity}
                   disabled={isSoldOut}
                 />
-              </Suspense>
               <button
                 className={styles.removeButton}
                 type="button"
@@ -188,14 +200,12 @@ const ProductDetail = () => {
             </div>
           ) : (
             <div className={styles.purchase}>
-             <Suspense fallback={<div>Loading...</div>}>
-                <QuantityPicker
+              <QuantityPicker
                   value={quantity}
                   max={Math.max(selectedVariant.stock, 1)}
                   onChange={setQuantity}
                   disabled={isSoldOut}
                 />
-              </Suspense>
               <button
                 className={styles.addButton}
                 type="button"

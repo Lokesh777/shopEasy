@@ -1,45 +1,52 @@
-import { useEffect, useState } from "react";
-import { lazy, Suspense } from "react";
-
-const ProductCard = lazy(() => import("../components/ProductCard"));
 import { getProducts } from "../services/api";
-import { Product } from "../types/product";
 import styles from "./Home.module.scss";
+import { useQuery } from "@tanstack/react-query";
+import ProductCard from "../components/ProductCard";
 
 const Home = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const {
+    data: products = [],
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["products"],
+    queryFn: getProducts,
+    staleTime: 1000 * 60 * 5,
+  });
 
-  useEffect(() => {
-    const controller = new AbortController();
+  // useEffect(() => {
+  //   const controller = new AbortController();
 
-    const loadProducts = async () => {
-      setLoading(true);
-      setError("");
+  //   const loadProducts = async () => {
+  //     setLoading(true);
+  //     setError("");
 
-      try {
-        const productData = await getProducts();
-        if (!controller.signal.aborted) setProducts(productData);
-      } catch {
-        if (!controller.signal.aborted) {
-          setError("Products could not be loaded. Please try again.");
-        }
-      } finally {
-        if (!controller.signal.aborted) setLoading(false);
-      }
-    };
+  //     try {
+  //       const productData = await getProducts();
+  //       if (!controller.signal.aborted) setProducts(productData);
+  //     } catch {
+  //       if (!controller.signal.aborted) {
+  //         setError("Products could not be loaded. Please try again.");
+  //       }
+  //     } finally {
+  //       if (!controller.signal.aborted) setLoading(false);
+  //     }
+  //   };
 
-    loadProducts();
-    return () => controller.abort();
-  }, []);
+  //   loadProducts();
+  //   return () => controller.abort();
+  // }, []);
 
-  if (loading) {
+  if (isLoading) {
     return <div className="pageStatus">Loading products...</div>;
   }
-
-  if (error) {
-    return <div className="pageStatus pageStatusError">{error}</div>;
+  
+  if (isError) {
+    return (
+      <div className="pageStatus pageStatusError">
+        Products could not be loaded.
+      </div>
+    );
   }
 
   return (

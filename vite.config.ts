@@ -1,27 +1,36 @@
-/// <reference types="vitest" />
-import { defineConfig } from "vite";
+import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
+import { analyzer } from "vite-bundle-analyzer";
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    analyzer({
+      analyzerMode: "static",
+      openAnalyzer: true,
+    }),
+  ],
 
-  // ✅ BUILD OPTIMIZATION
   build: {
-    minify: "esbuild",
+    minify: "oxc",
     target: "esnext",
     cssCodeSplit: true,
     sourcemap: false,
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ["react", "react-dom"],
-          router: ["react-router-dom"],
+        manualChunks(id) {
+          if (id.includes("react-router-dom")) {
+            return "router";
+          }
+
+          if (id.includes("react") || id.includes("react-dom")) {
+            return "vendor";
+          }
         },
       },
     },
   },
 
-  // ✅ VITEST CONFIG
   test: {
     environment: "jsdom",
     globals: true,

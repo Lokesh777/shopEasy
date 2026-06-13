@@ -1,16 +1,17 @@
-import { BrowserRouter } from "react-router-dom";
+import { RouterProvider } from "react-router-dom";
 import { CartProvider } from "./stores/CartContext";
-import Navbar from "./components/Navbar";
-import AppRoutes from "./routes/AppRoutes";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { router } from "./routes/router";
+
+const queryClient = new QueryClient();
 
 function App() {
   return (
-    <BrowserRouter>
+    <QueryClientProvider client={queryClient}>
       <CartProvider>
-        <Navbar />
-        <AppRoutes />
+        <RouterProvider router={router} />
       </CartProvider>
-    </BrowserRouter>
+    </QueryClientProvider>
   );
 }
 

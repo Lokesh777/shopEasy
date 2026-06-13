@@ -8,6 +8,7 @@ import {
 import { CartItem, Product, ProductVariant } from "../types/product";
 import { getPricing } from "../data/variants";
 import { addCartItemRequest } from "../services/mockCartApi";
+import { useMutation } from "@tanstack/react-query";
 
 const CART_STORAGE_KEY = "shopeasy.cart.v2";
 
@@ -39,6 +40,9 @@ export const getCartKey = (productId: number, variant: ProductVariant) =>
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cart, setCart] = useState<CartItem[]>(readCart);
+  const mutation = useMutation({
+    mutationFn: addCartItemRequest,
+  });
 
   useEffect(() => {
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
@@ -72,9 +76,9 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     };
 
     try {
-      await addCartItemRequest(nextItem);
+      await mutation.mutateAsync(nextItem);
     } catch (err) {
-      throw err; // 🔥 THIS IS IMPORTANT
+      throw err;
     }
 
     setCart((currentCart) => {

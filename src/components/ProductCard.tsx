@@ -5,6 +5,8 @@ import QuantityPicker from "./QuantityPicker";
 import { getCartKey, useCart } from "../stores/CartContext";
 import { Product } from "../types/product";
 import styles from "./ProductCard.module.scss";
+import { QueryClient } from "@tanstack/react-query";
+import { getProductById } from "../services/api";
 
 interface ProductCardProps {
   product: Product;
@@ -15,6 +17,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
   const [adding, setAdding] = useState(false);
   const [error, setError] = useState("");
   const defaultVariant = getDefaultVariant(product);
+  const queryClient = new QueryClient();
   const cartItem = cart.find(
     (item) => item.cartKey === getCartKey(product.id, defaultVariant),
   );
@@ -33,7 +36,12 @@ const ProductCard = ({ product }: ProductCardProps) => {
   };
 
   return (
-    <article className={styles.card}>
+    <article className={styles.card} onMouseEnter={() => {
+        queryClient.prefetchQuery({
+          queryKey: ["product", product.id],
+          queryFn: () => getProductById(product.id.toString()),
+        });
+      }}>
       <Link className={styles.mediaLink} to={`/product/${product.id}`}>
         <img src={product.image} alt={product.title} loading="lazy" />
       </Link>
